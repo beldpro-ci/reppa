@@ -1,0 +1,10 @@
+hash: 91d5d7133b29c8250531132c0fb17ee8f7a2cc050de45330a2898e48e3ee2313
+updated: 2017-04-19T22:15:02.454835791-03:00
+imports:
+- name: github.com/julienschmidt/httprouter
+  version: 8c199fb6259ffc1af525cc3ad52ee60ba8359669
+- name: github.com/pkg/errors
+  version: 645ef00459ed84a119197bfb8d8205042c6df63d
+- name: go.uber.org/zap
+  version: 1550bc05539134bbf8612a35f34a79ab8bf34ee3
+testImports: []
