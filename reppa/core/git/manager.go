@@ -50,7 +50,7 @@ func New(cfg *GitConfig) (gm *GitManager, err error) {
 	gm = &GitManager{
 		cfg: cfg,
 		logger: log.With(
-			zap.String("cfg", spew.Sdump(cfg))),
+			zap.String("cfg", spew.Sprintf("%#v", cfg))),
 		git: &Git{Binary: cfg.GitBinary},
 	}
 

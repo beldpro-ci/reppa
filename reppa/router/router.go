@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/beldpro-ci/reppa/reppa/common"
 	"github.com/beldpro-ci/reppa/reppa/core/git"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/julienschmidt/httprouter"
 	"go.uber.org/zap"
 	"net/http"
@@ -11,6 +12,21 @@ import (
 )
 
 var log = common.GetLogger()
+
+type RouterConfig struct {
+	GitConfig *git.GitConfig
+}
+
+func New(cfg *RouterConfig) *httprouter.Router {
+	router := httprouter.New()
+	router.GET("/ping", ping)
+	router.GET("/repositories/:name", newRepoHandler(cfg.GitConfig))
+
+	log.Debug("Router initialized",
+		zap.String("cfg", spew.Sprintf("%#v", cfg)))
+
+	return router
+}
 
 func logRequest(r *http.Request) {
 	log.Info("incoming request",
@@ -27,10 +43,8 @@ func ping(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	fmt.Fprint(w, "PONG")
 }
 
-func newRepoHandler() func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	gm, err := git.New(&git.GitConfig{
-		RepositoriesRoot: "/tmp/git",
-	})
+func newRepoHandler(cfg *git.GitConfig) func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	gm, err := git.New(cfg)
 	if err != nil {
 		panic(err)
 	}
@@ -46,12 +60,4 @@ func newRepoHandler() func(w http.ResponseWriter, r *http.Request, ps httprouter
 
 		fmt.Fprintf(w, "repo=%s!\n", repo)
 	}
-}
-
-func New() *httprouter.Router {
-	router := httprouter.New()
-	router.GET("/ping", ping)
-	router.GET("/repositories/:name", newRepoHandler())
-
-	return router
 }
