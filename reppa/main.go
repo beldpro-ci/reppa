@@ -1,24 +1,45 @@
 package main
 
 import (
-	"fmt"
-	"github.com/julienschmidt/httprouter"
-	"log"
+	"github.com/beldpro-ci/reppa/reppa/common"
+	"github.com/beldpro-ci/reppa/reppa/router"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
+	"gopkg.in/urfave/cli.v1"
 	"net/http"
+	"os"
 )
 
-func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	fmt.Fprint(w, "Welcome!\n")
-}
-
-func Hello(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	fmt.Fprintf(w, "hello, %s!\n", ps.ByName("name"))
-}
+var log = common.GetLogger()
 
 func main() {
-	router := httprouter.New()
-	router.GET("/", Index)
-	router.GET("/hello/:name", Hello)
+	app := cli.NewApp()
+	app.Name = "reppa"
+	app.Usage = "Repositories Manager"
+	app.Commands = []cli.Command{
+		{
+			Name: "start",
+			Action: func(c *cli.Context) error {
+				var port = c.String("port")
+				if port == "" {
+					return errors.New(
+						"`--port` must be specified.")
+				}
 
-	log.Fatal(http.ListenAndServe(":8080", router))
+				log.Info("Starting HTTP server",
+					zap.String("port", port))
+
+				http.ListenAndServe(":"+port, router.New())
+				return nil
+			},
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:   "port",
+					EnvVar: "REPPA_PORT",
+					Value:  "8080",
+				},
+			},
+		},
+	}
+	app.Run(os.Args)
 }
