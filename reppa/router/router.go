@@ -17,23 +17,27 @@ func logRequest(r *http.Request) {
 		zap.String("host-header", r.Host),
 		zap.String("uri", r.RequestURI),
 		zap.String("method", r.Method),
-		zap.String("time", time.Now().Format("02/Jan/2006:15:04:05 -0700")))
+		zap.String("time", time.Now().
+			Format("02/Jan/2006:15:04:05 -0700")))
 }
 
-func index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func ping(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	logRequest(r)
-	fmt.Fprint(w, "Welcome!\n")
+	fmt.Fprint(w, "PONG")
 }
 
-func hello(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func createRepo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	logRequest(r)
+
+	// checks if name is fine
+
 	fmt.Fprintf(w, "hello, %s!\n", ps.ByName("name"))
 }
 
 func New() *httprouter.Router {
 	router := httprouter.New()
-	router.GET("/", index)
-	router.GET("/hello/:name", hello)
+	router.GET("/ping", ping)
+	router.GET("/repositories/:name", createRepo)
 
 	return router
 }

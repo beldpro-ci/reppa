@@ -10,6 +10,8 @@ image: $(addsuffix .linux.amd64, $(PKGS))
 
 install: $(addprefix install-, $(PKGS))
 
+test: test-reppa
+
 
 deps:
 	glide install
@@ -18,6 +20,9 @@ deps:
 install-%:
 	cd $* && go install -v
 
+
+test-%:
+	cd $* && go test ./... -v
 
 clean:
 	find . -name "*.out" -type f -delete
@@ -28,10 +33,11 @@ clean:
 	cd $* && gofmt -s -w .
 	cd $* && GOOS=linux GOARCH=amd64 GCO_ENABLED=0 go build $(LD_FLAGS) -v -o $@
 
+
 %.out:
 	cd $* && gofmt -s -w .
 	cd $* && go build $(LD_FLAGS) -v -o $@
 
 
-.PHONY: deps install lint test clean image
+.PHONY: deps install lint test clean image test
 
