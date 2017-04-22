@@ -3,6 +3,7 @@ package router
 import (
 	"fmt"
 	"github.com/beldpro-ci/reppa/reppa/common"
+	"github.com/beldpro-ci/reppa/reppa/core/git"
 	"github.com/julienschmidt/httprouter"
 	"go.uber.org/zap"
 	"net/http"
@@ -26,18 +27,31 @@ func ping(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	fmt.Fprint(w, "PONG")
 }
 
-func createRepo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	logRequest(r)
+func newRepoHandler() func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	gm, err := git.New(&git.GitConfig{
+		RepositoriesRoot: "/tmp/git",
+	})
+	if err != nil {
+		panic(err)
+	}
 
-	// checks if name is fine
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		logRequest(r)
+		var repo = ps.ByName("name")
 
-	fmt.Fprintf(w, "hello, %s!\n", ps.ByName("name"))
+		if err := gm.InitBareRepository(repo); err != nil {
+			log.Error("Errored initializing bare repo",
+				zap.Error(err))
+		}
+
+		fmt.Fprintf(w, "repo=%s!\n", repo)
+	}
 }
 
 func New() *httprouter.Router {
 	router := httprouter.New()
 	router.GET("/ping", ping)
-	router.GET("/repositories/:name", createRepo)
+	router.GET("/repositories/:name", newRepoHandler())
 
 	return router
 }

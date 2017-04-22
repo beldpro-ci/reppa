@@ -12,3 +12,9 @@ import:
   version: v1.1.4
   subpackages:
   - assert
+- package: github.com/AaronO/go-git-http
+  version: 1.0.0
+- package: github.com/davecgh/go-spew
+  version: v1.1.0
+  subpackages:
+  - spew
