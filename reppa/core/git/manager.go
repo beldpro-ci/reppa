@@ -26,6 +26,7 @@ type GitConfig struct {
 type GitManager struct {
 	logger *zap.Logger
 	cfg    *GitConfig
+	git    *Git
 }
 
 // New instantiates a new GitManager. It requires that the configuration has
@@ -50,6 +51,7 @@ func New(cfg *GitConfig) (gm *GitManager, err error) {
 		cfg: cfg,
 		logger: log.With(
 			zap.String("cfg", spew.Sdump(cfg))),
+		git: &Git{Binary: cfg.GitBinary},
 	}
 
 	gm.logger.Debug("GitManager initialized")
@@ -65,6 +67,12 @@ func (gm *GitManager) InitBareRepository(name string) error {
 	gm.logger.Debug("Initializing bare repo",
 		zap.String("name", name),
 		zap.String("location", repositoryLocation))
+
+	if err := gm.git.InitBare(repositoryLocation); err != nil {
+		return errors.Wrapf(err,
+			"Errored initializing bare repo [%s]",
+			repositoryLocation)
+	}
 
 	return nil
 }

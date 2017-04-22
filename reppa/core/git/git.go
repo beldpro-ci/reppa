@@ -17,7 +17,7 @@ type Git struct {
 func (g *Git) InitBare(repositoryLocation string) error {
 	_, err := os.Stat(repositoryLocation)
 	if err != nil {
-		if err != os.ErrNotExist {
+		if !os.IsNotExist(err) {
 			return errors.Wrapf(err,
 				"Couldn't inspect repo location for bare init [%s]",
 				repositoryLocation)
